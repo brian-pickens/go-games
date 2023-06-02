@@ -1,10 +1,10 @@
 package wordle
 
 import (
+	_ "embed"
 	"log"
 	"math/rand"
 	"strings"
-	_ "embed"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -40,6 +40,7 @@ func StartGame() (error) {
 	dict := strings.Split(DICTIONARY, "\n")
 	selectedWord := dict[rand.Intn(len(dict))]
 	game.answer = NewAnswer(selectedWord)
+	
 	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)
 	}
@@ -60,21 +61,26 @@ func (g *game) Draw(screen *ebiten.Image) {
 
 func (g *game) Update() error {
 	var input []rune
-	input = ebiten.AppendInputChars(input[:0])
+
+	if g.currentColumn > COLUMNS &&
+	   ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		g.currentColumn = 1
+		g.currentRow++
+	}
+	if g.currentColumn > COLUMNS {
+		return nil
+	}
 
 	if g.currentRow > ROWS {
 		g.result = "END"
 		return nil
 	}
-	
+
+	input = ebiten.AppendInputChars(input[:0])
+
 	if (len(input) > 0) {
 		g.input[g.currentRow-1][g.currentColumn-1] = input
 		g.currentColumn++
-	}
-
-	if (g.currentColumn > COLUMNS) {
-		g.currentColumn = 1
-		g.currentRow++
 	}
 
 	return nil
@@ -83,3 +89,4 @@ func (g *game) Update() error {
 func (g *game) Layout(outsideWidth int, outsideHeight int) (screenWidth int, screenHeight int) {
 	return g.screenWidth, g.screenHeight
 }
+
