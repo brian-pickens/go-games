@@ -2,6 +2,9 @@ package wordle
 
 import (
 	"log"
+	"math/rand"
+	"strings"
+	_ "embed"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -16,11 +19,15 @@ const (
 type game struct{
 	screenWidth int
 	screenHeight int
+	answer answer
 	input [6][5][]rune
 	currentRow int
 	currentColumn int
 	result string
 }
+
+//go:embed wordle.txt
+var DICTIONARY string
 
 func StartGame() (error) {
 	game := game{
@@ -29,6 +36,10 @@ func StartGame() (error) {
 		currentRow: 1,
 		currentColumn: 1,
 	}
+
+	dict := strings.Split(DICTIONARY, "\n")
+	selectedWord := dict[rand.Intn(len(dict))]
+	game.answer = NewAnswer(selectedWord)
 	if err := ebiten.RunGame(&game); err != nil {
 		log.Fatal(err)
 	}
