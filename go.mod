@@ -1,4 +1,4 @@
-module github.com/brian-pickens/hello-world-go-game
+module github.com/brian-pickens/go-games
 
 go 1.20
 

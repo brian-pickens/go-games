@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/brian-pickens/hello-world-go-game/wordle"
+	"github.com/brian-pickens/go-games/wordle"
 )
 
 func main() {
