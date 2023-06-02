@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/brian-pickens/go-games/helpers"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -20,7 +21,7 @@ type game struct{
 	screenWidth int
 	screenHeight int
 	answer answer
-	input [6][5][]rune
+	input [6][5]rune
 	currentRow int
 	currentColumn int
 	result string
@@ -79,8 +80,12 @@ func (g *game) Update() error {
 	input = ebiten.AppendInputChars(input[:0])
 
 	if (len(input) > 0) {
-		g.input[g.currentRow-1][g.currentColumn-1] = input
-		g.currentColumn++
+		columns := helpers.Min(len(input), (COLUMNS-g.currentColumn+1))
+		for i := 0; i < columns; i++ {
+			g.input[g.currentRow-1][g.currentColumn-1+i] = input[i]
+		}
+		g.currentColumn += columns
+		log.Println(g.currentColumn)
 	}
 
 	return nil
