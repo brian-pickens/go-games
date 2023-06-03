@@ -40,6 +40,7 @@ func StartGame() (error) {
 
 	dict := strings.Split(DICTIONARY, "\n")
 	selectedWord := dict[rand.Intn(len(dict))]
+	log.Println(selectedWord)
 	game.answer = NewAnswer(selectedWord)
 	
 	if err := ebiten.RunGame(&game); err != nil {
@@ -65,6 +66,7 @@ func (g *game) Update() error {
 
 	if g.currentColumn > COLUMNS &&
 	   ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		log.Println(g.answer.Guess(g.input[g.currentRow-1]))
 		g.currentColumn = 1
 		g.currentRow++
 	}
@@ -85,7 +87,6 @@ func (g *game) Update() error {
 			g.input[g.currentRow-1][g.currentColumn-1+i] = input[i]
 		}
 		g.currentColumn += columns
-		log.Println(g.currentColumn)
 	}
 
 	return nil
