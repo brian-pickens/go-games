@@ -17,10 +17,12 @@ func NewAnswer(str string) (answer) {
 
 func (an *answer) Guess(guess [COLUMNS]rune) (result bool, guessState [COLUMNS]state) {
 	result = false
-	if guess == ([5]rune)(*an) {
+	if guess == ([COLUMNS]rune)(*an) {
 		result = true
 	}
 
+	anCount := an.letterCount()
+	loopCount := map[rune]int{}
 	for a := 0; a < COLUMNS; a++ {
 		if result {
 			guessState[a] = correct
@@ -38,14 +40,25 @@ func (an *answer) Guess(guess [COLUMNS]rune) (result bool, guessState [COLUMNS]s
 		}
 
 		for b := 0; b < COLUMNS; b++ {
-			if guess[a] == an[b] {
+			if guess[a] == an[b] && loopCount[guess[a]] < anCount[guess[a]] {
 				guessState[a] = present
-				return
+				loopCount[guess[a]]++
+				break
 			}
 		}
 
-		guessState[a] = incorrect
+		if (guessState[a] != present) {
+			guessState[a] = incorrect
+		}
 	}
 
 	return result, guessState
+}
+
+func (an *answer) letterCount() (count map[rune]int) {
+	count = map[rune]int{}
+	for _, r := range an {
+		count[r]++
+	}
+	return count
 }
