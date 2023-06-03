@@ -25,6 +25,8 @@ type game struct{
 	currentRow int
 	currentColumn int
 	result string
+	guess bool
+	guessState [COLUMNS]state
 }
 
 //go:embed wordle.txt
@@ -66,7 +68,8 @@ func (g *game) Update() error {
 
 	if g.currentColumn > COLUMNS &&
 	   ebiten.IsKeyPressed(ebiten.KeyEnter) {
-		log.Println(g.answer.Guess(g.input[g.currentRow-1]))
+		g.guess, g.guessState = g.answer.Guess(g.input[g.currentRow-1])
+		log.Println(g.guess, g.guessState)
 		g.currentColumn = 1
 		g.currentRow++
 	}
@@ -74,8 +77,13 @@ func (g *game) Update() error {
 		return nil
 	}
 
+	if g.guess {
+		g.result = "WIN"
+		return nil
+	}
+
 	if g.currentRow > ROWS {
-		g.result = "END"
+		g.result = "LOOSE"
 		return nil
 	}
 
