@@ -8,6 +8,7 @@ import (
 
 	"github.com/brian-pickens/go-games/helpers"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
@@ -66,6 +67,14 @@ func (g *game) Draw(screen *ebiten.Image) {
 func (g *game) Update() error {
 	var input []rune
 
+	// Undo typed characters
+	if g.currentColumn > 1 &&
+	   inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
+		g.input[g.currentRow-1][g.currentColumn-2] = rune(0)
+		g.currentColumn--
+	}
+
+	// Guess the answer when the Enter key is pressed
 	if g.currentColumn > COLUMNS &&
 	   ebiten.IsKeyPressed(ebiten.KeyEnter) {
 		g.guess, g.guessState = g.answer.Guess(g.input[g.currentRow-1])
@@ -73,22 +82,26 @@ func (g *game) Update() error {
 		g.currentColumn = 1
 		g.currentRow++
 	}
+
+	// Hold if all letters for the current row are guessed
 	if g.currentColumn > COLUMNS {
 		return nil
 	}
 
+	// Win condition
 	if g.guess {
 		g.result = "WIN"
 		return nil
 	}
 
+	// Loose condition
 	if g.currentRow > ROWS {
 		g.result = "LOOSE"
 		return nil
 	}
 
+	// Handle User Input
 	input = ebiten.AppendInputChars(input[:0])
-
 	if (len(input) > 0) {
 		columns := helpers.Min(len(input), (COLUMNS-g.currentColumn+1))
 		for i := 0; i < columns; i++ {
