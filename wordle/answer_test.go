@@ -20,18 +20,20 @@ func Test_Guess_NoMatch_ResultShouldBeFalse(t *testing.T) {
 
 func Test_Guess_Match_GuessStateShouldBeAllCorrect(t *testing.T) {
 	word := "abcde"
+	guess := "abcde"
 	answer := NewAnswer(word)
 	expected := [5]state{ correct, correct, correct, correct, correct }
-	_, guessState := answer.Guess(([5]rune)([]rune("abcde")))
-	assert.ElementsMatch(t, expected, guessState)
+	_, actual := answer.Guess(([5]rune)([]rune(guess)))
+	assert.ElementsMatch(t, expected, actual)
 }
 
 func Test_Guess_PartialMatch_GuessStateShouldMatch(t *testing.T) {
 	word := "abccc"
+	guess := "abcde"
 	answer := NewAnswer(word)
 	expected := [5]state{ correct, correct, correct, incorrect, incorrect }
-	_, guessState := answer.Guess(([5]rune)([]rune("abcde")))
-	assert.ElementsMatch(t, expected, guessState)
+	_, actual := answer.Guess(([5]rune)([]rune(guess)))
+	assert.ElementsMatch(t, expected, actual)
 }
 
 func Test_Guess_WrongOrder_GuessStateShouldShowPresent(t *testing.T) {
