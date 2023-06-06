@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"log"
 	"math/rand"
-	"regexp"
 	"strings"
 
 	"github.com/brian-pickens/go-games/helpers"
