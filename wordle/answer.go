@@ -10,12 +10,12 @@ const (
 	correct
 )
 
-func NewAnswer(str string) (answer) {
+func newAnswer(str string) *answer {
 	an := ([5]rune)([]rune(str))
-	return answer{an[0], an[1], an[2], an[3], an[4]}
+	return &answer{an[0], an[1], an[2], an[3], an[4]}
 }
 
-func (an *answer) Guess(guess [COLUMNS]rune) (result bool, guessState [COLUMNS]state) {
+func (an *answer) guess(guess [COLUMNS]rune) (result bool, guessState [COLUMNS]state) {
 	result = false
 	if guess == ([COLUMNS]rune)(*an) {
 		result = true
@@ -47,7 +47,7 @@ func (an *answer) Guess(guess [COLUMNS]rune) (result bool, guessState [COLUMNS]s
 			}
 		}
 
-		if (guessState[a] != present) {
+		if guessState[a] != present {
 			guessState[a] = incorrect
 		}
 	}

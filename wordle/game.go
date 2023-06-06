@@ -2,14 +2,18 @@ package wordle
 
 import (
 	_ "embed"
+	"image/color"
 	"log"
 	"math/rand"
+	"regexp"
 	"strings"
 
 	"github.com/brian-pickens/go-games/helpers"
+	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 const (
@@ -18,50 +22,66 @@ const (
 	COLUMNS int    = 5
 )
 
-type game struct{
-	screenWidth int
-	screenHeight int
-	answer answer
-	input [6][5]rune
-	currentRow int
+type game struct {
+	screenWidth   int
+	screenHeight  int
+	font 		  *font.Face
+	answer        *answer
+	input         [6][5]rune
+	currentRow    int
 	currentColumn int
-	result string
-	guess bool
-	guessState [COLUMNS]state
+	result        string
+	guess         bool
+	guessState    [COLUMNS]state
 }
 
 //go:embed wordle.txt
 var DICTIONARY string
 
-func StartGame() (error) {
-	game := game{
-		screenWidth: 320,
-		screenHeight: 240,
-		currentRow: 1,
+func StartGame() error {
+	game := &game{
+		screenWidth:   320,
+		screenHeight:  240,
+		currentRow:    1,
 		currentColumn: 1,
 	}
 
+	// Select word from the dictionary
 	dict := strings.Split(DICTIONARY, "\n")
 	selectedWord := dict[rand.Intn(len(dict))]
 	log.Println(selectedWord)
-	game.answer = NewAnswer(selectedWord)
-	
-	if err := ebiten.RunGame(&game); err != nil {
+	game.answer = newAnswer(selectedWord)
+
+	// Setup font
+	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
+	if err != nil {
+		log.Fatal(err)
+	}
+	font, err := opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    24,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	game.font = &font
+
+	// Run Game
+	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
 	return nil
 }
 
 func (g *game) Draw(screen *ebiten.Image) {
-	var text string
+	screen.Fill(color.White)
 	for row := 1; row <= ROWS; row++ {
 		for column := 1; column <= COLUMNS; column++ {
-			text += string(g.input[row-1][column-1])
+			tile := newTile(g, g.input[row-1][column-1], row, column)
+			tile.Draw(screen)
 		}
-		text += "\n"
 	}
-	text += g.result
-	ebitenutil.DebugPrint(screen, text)
 }
 
 func (g *game) Update() error {
@@ -69,15 +89,15 @@ func (g *game) Update() error {
 
 	// Undo typed characters
 	if g.currentColumn > 1 &&
-	   inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
+		inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
 		g.input[g.currentRow-1][g.currentColumn-2] = rune(0)
 		g.currentColumn--
 	}
 
 	// Guess the answer when the Enter key is pressed
 	if g.currentColumn > COLUMNS &&
-	   ebiten.IsKeyPressed(ebiten.KeyEnter) {
-		g.guess, g.guessState = g.answer.Guess(g.input[g.currentRow-1])
+		ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		g.guess, g.guessState = g.answer.guess(g.input[g.currentRow-1])
 		log.Println(g.guess, g.guessState)
 		g.currentColumn = 1
 		g.currentRow++
@@ -116,4 +136,3 @@ func (g *game) Update() error {
 func (g *game) Layout(outsideWidth int, outsideHeight int) (screenWidth int, screenHeight int) {
 	return g.screenWidth, g.screenHeight
 }
-
