@@ -1,8 +1,11 @@
 package wordle
 
 import (
+	"bytes"
 	_ "embed"
+	"image"
 	"image/color"
+	_ "image/png"
 	"log"
 	"math/rand"
 	"strings"
@@ -15,6 +18,11 @@ import (
 	"golang.org/x/image/font/opentype"
 )
 
+//go:embed wordle.txt
+var DICTIONARY string
+//go:embed tiles_spritesheet.png
+var SPRITE_BYTES []byte
+
 const (
 	TITLE   string = "Wordle"
 	ROWS    int    = 6
@@ -24,6 +32,7 @@ const (
 type game struct {
 	screenWidth   int
 	screenHeight  int
+	sprite        *ebiten.Image
 	font 		  *font.Face
 	answer        *answer
 	input         [6][5]rune
@@ -34,9 +43,6 @@ type game struct {
 	guessState    [COLUMNS]state
 }
 
-//go:embed wordle.txt
-var DICTIONARY string
-
 func StartGame() error {
 	game := &game{
 		screenWidth:   320,
@@ -44,6 +50,13 @@ func StartGame() error {
 		currentRow:    1,
 		currentColumn: 1,
 	}
+
+	// Load game sprite
+	img, _, err := image.Decode(bytes.NewBuffer(SPRITE_BYTES))
+	if err != nil {
+		return err
+	}
+	game.sprite = ebiten.NewImageFromImage(img)
 
 	// Select word from the dictionary
 	dict := strings.Split(DICTIONARY, "\n")
