@@ -45,8 +45,8 @@ type game struct {
 
 func StartGame() error {
 	game := &game{
-		screenWidth:   320,
-		screenHeight:  240,
+		screenWidth:   145,
+		screenHeight:  185,
 		currentRow:    1,
 		currentColumn: 1,
 	}
