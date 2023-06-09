@@ -17,47 +17,34 @@ func newAnswer(str string) *answer {
 
 func (an *answer) guess(guess [COLUMNS]rune) (result bool, guessState [COLUMNS]state) {
 	result = false
+	answerCount := letterCount(([COLUMNS]rune)(*an))
+	guessCount := map[rune]int{}
+
 	if guess == ([COLUMNS]rune)(*an) {
-		result = true
+		return true, [COLUMNS]state{correct, correct, correct, correct, correct}
 	}
 
-	anCount := an.letterCount()
-	loopCount := map[rune]int{}
 	for a := 0; a < COLUMNS; a++ {
-		if result {
-			guessState[a] = correct
-			continue
-		}
-
-		if guess[a] == rune(0) {
-			guessState[a] = empty
-			continue
-		}
-
+		guessState[a] = incorrect
 		if guess[a] == an[a] {
 			guessState[a] = correct
-			continue
+			guessCount[guess[a]]++
 		}
+	}
 
-		for b := 0; b < COLUMNS; b++ {
-			if guess[a] == an[b] && loopCount[guess[a]] < anCount[guess[a]] {
-				guessState[a] = present
-				loopCount[guess[a]]++
-				break
-			}
-		}
-
-		if guessState[a] != present {
-			guessState[a] = incorrect
+	for a := 0; a < COLUMNS; a++ {
+		guessCount[guess[a]]++
+		if guessState[a] != correct && guessCount[guess[a]] <= answerCount[guess[a]] {
+			guessState[a] = present
 		}
 	}
 
 	return result, guessState
 }
 
-func (an *answer) letterCount() (count map[rune]int) {
+func letterCount(runes [COLUMNS]rune) (count map[rune]int) {
 	count = map[rune]int{}
-	for _, r := range an {
+	for _, r := range runes {
 		count[r]++
 	}
 	return count

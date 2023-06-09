@@ -54,6 +54,15 @@ func Test_Guess_WithExtraMatchingLettersShouldShowIncorrect(t *testing.T) {
 	assert.ElementsMatch(t, expected, actual)
 }
 
+func Test_Guess_WithExtra(t *testing.T) {
+	word := "pruno"
+	guess := "promo"
+	answer := newAnswer(word)
+	expected := [5]state{correct, correct, incorrect, incorrect, correct}
+	_, actual := answer.guess(([5]rune)([]rune(guess)))
+	assert.ElementsMatch(t, expected, actual)
+}
+
 func Test_CountLetters_ReturnsMapOfCorrectLetterCounts(t *testing.T) {
 	word := "batty"
 	answer := newAnswer(word)
@@ -63,6 +72,6 @@ func Test_CountLetters_ReturnsMapOfCorrectLetterCounts(t *testing.T) {
 		't': 2,
 		'y': 1,
 	}
-	actual := answer.letterCount()
+	actual := letterCount(([COLUMNS]rune)(*answer))
 	assert.EqualValues(t, expected, actual)
 }
